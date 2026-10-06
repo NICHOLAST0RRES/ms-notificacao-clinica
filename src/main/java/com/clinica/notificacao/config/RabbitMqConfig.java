@@ -22,6 +22,17 @@ public class RabbitMqConfig {
 
 
     @Bean
+    public FanoutExchange deadLetterExchange() {
+        return new FanoutExchange(DLX, true, false);
+    }
+
+    @Bean
+    public Binding dlqBinding(Queue dlq, FanoutExchange deadLetterExchange) {
+        return BindingBuilder.bind(dlq).to(deadLetterExchange);
+    }
+
+
+    @Bean
     public TopicExchange eventosExchange() {
         return new TopicExchange(EXCHANGE, true, false);
     }
@@ -73,22 +84,11 @@ public class RabbitMqConfig {
         return BindingBuilder.bind(lembreteQueue).to(eventosExchange).with("lembrete.gerado");
     }
 
-    @Bean
-    public DirectExchange deadLetterExchange() {
-        return new DirectExchange(DLX, true, false);
-    }
 
     @Bean
     public Queue dlq() {
         return new Queue(FILA_DLQ, true);
     }
-
-    @Bean
-    public Binding dlqBinding(Queue dlq, DirectExchange deadLetterExchange) {
-        return BindingBuilder.bind(dlq).to(deadLetterExchange).with("");
-    }
-
-
 
 
     @Bean
