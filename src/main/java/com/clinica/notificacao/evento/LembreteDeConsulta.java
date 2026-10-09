@@ -1,6 +1,6 @@
 package com.clinica.notificacao.evento;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public record LembreteDeConsulta(
@@ -8,7 +8,8 @@ public record LembreteDeConsulta(
         String pacienteNome,
         String pacienteTelefone,
         String profissionalNome,
-        LocalDateTime dataHora
+        OffsetDateTime dataHora,
+        OffsetDateTime ocorridoEm
 ) {
 
 
