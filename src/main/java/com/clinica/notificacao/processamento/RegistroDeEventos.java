@@ -21,6 +21,15 @@ public class RegistroDeEventos {
         this.jdbc = jdbc;
     }
 
+    private boolean existeEstadoMaisNovo(UUID consultaId, OffsetDateTime ocorridoEm) {
+        Boolean existe = jdbc.queryForObject("""
+                select exists (
+                    select 1 from ultimo_evento_por_consulta
+                    where consulta_id = ? and ocorrido_em > ?
+                )
+                """, Boolean.class, consultaId, ocorridoEm);
+        return Boolean.TRUE.equals(existe);
+    }
     @Transactional
     public Resultado registrar(Message mensagem, String tipo, UUID consultaId,
                                OffsetDateTime ocorridoEm, boolean eventoDeEstado) {
@@ -40,22 +49,26 @@ public class RegistroDeEventos {
         if (inseridas == 0) {
             return Resultado.REPETIDO;
         }
-
         // 2. Ordem: evento de estado mais antigo que o último da consulta é descartado
-        if (eventoDeEstado && ocorridoEm != null) {
-            int atualizadas = jdbc.update("""
-                    insert into ultimo_evento_por_consulta (consulta_id, ocorrido_em, tipo)
-                    values (?, ?, ?)
-                    on conflict (consulta_id) do update
-                        set ocorrido_em = excluded.ocorrido_em, tipo = excluded.tipo
-                        where excluded.ocorrido_em >= ultimo_evento_por_consulta.ocorrido_em
-                    """, consultaId, ocorridoEm, tipo);
+        if (ocorridoEm != null) {
+            if (eventoDeEstado) {
+                // Evento de estado: só vira o último se for mais novo
+                int atualizadas = jdbc.update("""
+                insert into ultimo_evento_por_consulta (consulta_id, ocorrido_em, tipo)
+                values (?, ?, ?)
+                on conflict (consulta_id) do update
+                    set ocorrido_em = excluded.ocorrido_em, tipo = excluded.tipo
+                    where excluded.ocorrido_em >= ultimo_evento_por_consulta.ocorrido_em
+                """, consultaId, ocorridoEm, tipo);
 
-            if (atualizadas == 0) {
+                if (atualizadas == 0) {
+                    return Resultado.OBSOLETO;
+                }
+            } else if (existeEstadoMaisNovo(consultaId, ocorridoEm)) {
+                // Lembrete gerado antes de a consulta ser cancelada ou reagendada: está desatualizado
                 return Resultado.OBSOLETO;
             }
         }
-
         // 3. Efeito: notificação pendente
         String corpo = new String(mensagem.getBody(), StandardCharsets.UTF_8);
         jdbc.update("""
