@@ -1,0 +1,9 @@
+{
+  "consultaId": "0199f000-0000-7000-8000-000000000003",
+  "pacienteNome": "Maria Teste",
+  "pacienteTelefone": "71999990000",
+  "profissionalNome": "Dr. Teste",
+  "dataHoraAnterior": "2026-10-11T10:00:00-03:00",
+  "dataHoraNova": "2026-10-13T09:00:00-03:00",
+  "ocorridoEm": "2026-10-10T18:05:00-03:00"
+}

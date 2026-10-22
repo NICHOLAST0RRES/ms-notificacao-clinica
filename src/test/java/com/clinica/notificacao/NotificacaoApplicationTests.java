@@ -1,13 +1,10 @@
 package com.clinica.notificacao;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class NotificacaoApplicationTests {
+class NotificacaoApplicationTests extends TesteDeIntegracao {
 
 	@Test
 	void contextLoads() {
 	}
-
 }
