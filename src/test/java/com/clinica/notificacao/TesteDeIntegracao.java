@@ -9,7 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 @SpringBootTest
 @Import(InfraDeTeste.class)
-public class TesteDeIntegracao {
+public abstract class TesteDeIntegracao {
 
     @Autowired
     protected JdbcTemplate jdbc;
